@@ -9,6 +9,7 @@ import type { ChatInputCommandInteraction, OmitPartialGroupDMChannel, Message } 
 
 import {
   maxPlatformSize,
+  emoteSizeChange,
   assetSizeChange
 } from '../../utils/handlers/command-handlers/emote/size-change.ts';
 import { downloadAsset } from '../../utils/handlers/command-handlers/emote/download-asset.ts';
@@ -361,6 +362,25 @@ export function emotesHandler(cachedUrl: Readonly<CachedUrl>) {
           return '0.40';
         return undefined;
       })();
+
+      // single matched emote with nothing to render: reply with its url directly, skipping ffmpeg
+      if (emotes.length === 1 && !enableEmoteBorder && stopDuration === undefined) {
+        const match = emoteMatcher.matchSingle(emotes[0]);
+
+        if (match !== undefined) {
+          const { url, platform } = match;
+          const reply =
+            fullSize ? emoteSizeChange(url, maxPlatformSize(platform), platform)
+            : size !== undefined ? emoteSizeChange(url, size, platform)
+            : url;
+
+          await defer;
+          if (interaction !== undefined) await interaction.editReply(reply);
+          else if (message !== undefined)
+            await message.reply({ content: reply, allowedMentions: { repliedUser: false } });
+          return;
+        }
+      }
 
       // dir sync only if multiple emotes
       ensureDirSync(outdir);

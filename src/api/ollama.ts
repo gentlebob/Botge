@@ -104,7 +104,9 @@ export async function generateReply(
     retrievedContext.length > 0 ?
       `[Relevant past conversations — use for context only, do not reference directly]\n${retrievedContext.join('\n---\n')}\n\n`
     : '';
-  const userPrompt = `${ragSection}[Recent chat]\n${recentHistory}\n\nWrite your reply as ${botName}. One short message only.`;
+  // Recent chat goes first: it only ever grows at the end, so Ollama can reuse
+  // the cached prefix. The retrieved context changes every call, so it follows.
+  const userPrompt = `[Recent chat]\n${recentHistory}\n\n${ragSection}Write your reply to the last message in [Recent chat] as ${botName}. One short message only.`;
 
   return await ollamaChat(systemPrompt, userPrompt);
 }

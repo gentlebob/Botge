@@ -74,7 +74,9 @@ export type OllamaConfig = {
   };
   readonly behavior: {
     readonly replyScoreThreshold: number;
-    readonly contextWindow: number;
+    readonly historyHighWatermarkTokens: number;
+    readonly historyLowWatermarkTokens: number;
+    readonly ragQueryMessages: number;
     readonly evaluationChance: number;
     readonly cooldownSeconds: number;
     readonly ragResults: number;
